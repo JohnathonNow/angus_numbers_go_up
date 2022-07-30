@@ -13,6 +13,9 @@ Each chunk of the world map has a separate set of queues. At the start of each t
 elements may migrate between queues of different chunks. For example, a player
 may move to a new chunk.
 
+Or is it better to have sets of queues per some other sharding scheme, to avoid
+migration? Each chunk could have an output buffer to send to nearby players.
+
 ## Queue priority
 
 1. Take damage
