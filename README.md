@@ -2,11 +2,16 @@
 
 ## Tick order
 
-1. Process environment queue
-2. Process NPC queues
-3. Process item queues
-4. Process player queues
-5. Send updates
+1. Chunk sync and migration
+2. Process environment queue
+3. Process NPC queues
+4. Process item queues
+5. Process player queues
+6. Send updates
+
+Each chunk of the world map has a separate set of queues. At the start of each tick,
+elements may migrate between queues of different chunks. For example, a player
+may move to a new chunk.
 
 ## Queue priority
 
@@ -15,4 +20,6 @@
 3. Move
 4. Attack
 5. Action 
+
+
 
