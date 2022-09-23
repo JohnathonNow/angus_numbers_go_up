@@ -1,14 +1,24 @@
-use priority_queue::PriorityQueue;
+use crate::{player::Player, environment::{Environment, EnvironmentEvent}};
 
 pub struct Server {
-    env: PriorityQueue<String, i32>
+    env: Environment,
+    players: Vec<Player>,
 }
 
 impl Server {
     pub fn new() -> Self {
-        Self { env: PriorityQueue::new() } 
+        Self { env: Environment::new(), players: Vec::new() } 
+        
     }
+    
     pub fn env_queue(&mut self, s: String, i: i32) {
-        self.env.push(s, i);
+        self.env.enqueue(EnvironmentEvent::MESSAGE{text: s}, i);
+    }
+
+    pub fn tick(&mut self) {
+        self.env.tick();
+        for player in &mut self.players {
+            player.tick();
+        }
     }
 }
