@@ -3,7 +3,6 @@ use priority_queue::PriorityQueue;
 
 #[derive(Hash, PartialEq, Eq)]
 pub enum EnvironmentEvent {
-    PASS,
     MESSAGE{text: String},
 }
 
