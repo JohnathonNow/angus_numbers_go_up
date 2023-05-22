@@ -1,4 +1,5 @@
-const socket = new WebSocket('ws://localhost:3030/chat');
+//const socket = new WebSocket('ws://localhost:3030/chat');
+const socket = new WebSocket('ws://'+window.location.hostname+':3030/chat');
 const chatLog = document.getElementById('chat-log');
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
@@ -32,7 +33,7 @@ socket.addEventListener('close', event => {
 // Function to send a message to the server
 function sendMessage() {
   const message = messageInput.value;
-  socket.send(message);
+  socket.send(JSON.stringify({"Chat": {"message": message}}));
   messageInput.value = '';
 }
 

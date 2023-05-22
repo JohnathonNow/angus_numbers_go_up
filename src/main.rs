@@ -10,6 +10,8 @@ use futures::{FutureExt, StreamExt, SinkExt};
 
 type PeerMap = Arc<Mutex<HashMap<u64, broadcast::Sender<String>>>>;
 
+mod packets;
+
 #[tokio::main]
 async fn main() {
     // Initialize the peer map
@@ -39,7 +41,7 @@ async fn main() {
         });
 
     // Start the server
-    warp::serve(ws_route).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(ws_route).run(([0, 0, 0, 0], 3030)).await;
 }
 
 async fn user_connected(ws: WebSocket, peer_map: PeerMap, gtx: broadcast::Sender<String>) {
@@ -73,7 +75,13 @@ async fn user_connected(ws: WebSocket, peer_map: PeerMap, gtx: broadcast::Sender
             };
 
             println!("GOT MESSAGE {}!", message);
-            let _ = gtx.send(message);
+            if let Ok(packet) = serde_json::from_str::<packets::Packet>(&message) {
+                println!("It's {:?}!", packet);
+                match packet {
+                    packets::Packet::Chat{message} => {let _ = gtx.send(message);},
+                    _ => {}
+                }
+            }
         }
 
         // Remove the user from the peer map when the connection is closed
