@@ -3,6 +3,7 @@ const socket = new WebSocket('ws://'+window.location.hostname+':3030/chat');
 const chatLog = document.getElementById('chat-log');
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
+var gUsername = null;
 
 // Event listener for when the WebSocket connection is established
 socket.addEventListener('open', event => {
@@ -33,7 +34,12 @@ socket.addEventListener('close', event => {
 // Function to send a message to the server
 function sendMessage() {
   const message = messageInput.value;
-  socket.send(JSON.stringify({"Chat": {"message": message}}));
+  if (gUsername) {
+      socket.send(JSON.stringify({"Chat": {"message": message}}));
+  } else {
+      gUsername = message;
+      socket.send(JSON.stringify({"Login": {"username": message}}));
+  }
   messageInput.value = '';
 }
 

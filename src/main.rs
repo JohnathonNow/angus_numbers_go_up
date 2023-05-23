@@ -2,11 +2,10 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use tokio::sync::broadcast;
-use tokio::sync::mpsc;
 use tokio::task;
 use warp::ws::{Message, WebSocket};
 use warp::Filter;
-use futures::{FutureExt, StreamExt, SinkExt};
+use futures::{StreamExt, SinkExt};
 
 type PeerMap = Arc<Mutex<HashMap<u64, broadcast::Sender<String>>>>;
 
@@ -59,6 +58,33 @@ async fn user_connected(ws: WebSocket, peer_map: PeerMap, gtx: broadcast::Sender
     let user_id_clone = user_id;
     println!("USER CONNECTED!");
     tokio::task::spawn(async move {
+        let login_name = loop { 
+            if let Some(result) = user_ws_rx.next().await {
+                let message = match result {
+                    Ok(msg) => msg,
+                    Err(e) => {
+                        eprintln!("WebSocket error: {}", e);
+                        return;
+                    }
+                };
+
+                let message = if let Ok(text) = message.to_str() {
+                    text.to_owned()
+                } else {
+                    continue;
+                };
+
+                if let Ok(packet) = serde_json::from_str::<packets::Incoming>(&message) {
+                    println!("LoginWaiter: It's {:?}!", packet);
+                    match packet {
+                        packets::Incoming::Login{username} => {break username;},
+                        _ => {}
+                    }
+                }
+            } else {
+                return;
+            }
+        };
         while let Some(result) = user_ws_rx.next().await {
             let message = match result {
                 Ok(msg) => msg,
@@ -75,10 +101,12 @@ async fn user_connected(ws: WebSocket, peer_map: PeerMap, gtx: broadcast::Sender
             };
 
             println!("GOT MESSAGE {}!", message);
-            if let Ok(packet) = serde_json::from_str::<packets::Packet>(&message) {
-                println!("It's {:?}!", packet);
+            if let Ok(packet) = serde_json::from_str::<packets::Incoming>(&message) {
+                println!("MainLoop: It's {:?}!", packet);
                 match packet {
-                    packets::Packet::Chat{message} => {let _ = gtx.send(message);},
+                    packets::Incoming::Chat{message} => {
+                        let _ = gtx.send(serde_json::to_string(&packets::Outgoing::Chat{sender: login_name.clone(), message, tick: 0}).unwrap());
+                    },
                     _ => {}
                 }
             }
