@@ -39,8 +39,13 @@ async fn main() {
             ws.on_upgrade(move |socket| user_connected(socket, peer_map, tx))
         });
 
+    // Serve static files from the "frontend" directory
+    let static_files = warp::fs::dir("frontend");
+
+    // Combine the WebSocket route and static files route
+    let routes = ws_route.or(static_files);
     // Start the server
-    warp::serve(ws_route).run(([0, 0, 0, 0], 3030)).await;
+    warp::serve(routes).run(([0, 0, 0, 0], 3030)).await;
 }
 
 async fn user_connected(ws: WebSocket, peer_map: PeerMap, gtx: broadcast::Sender<String>) {
