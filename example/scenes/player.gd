@@ -23,7 +23,7 @@ func _ready():
 
 func _process(_delta):
 	# Handle mouse capture.
-	if Input.is_action_just_pressed("ui_cancel"):
+	if Input.is_action_just_released("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE else Input.MOUSE_MODE_VISIBLE
 
 func _physics_process(delta):

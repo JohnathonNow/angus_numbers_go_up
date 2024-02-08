@@ -36,5 +36,6 @@ _shader_parameters = {
 "noise3_scale": 0.225,
 "noise_texture": SubResource("NoiseTexture2D_wrbl0")
 }
+world_background = 2
 shader_override_enabled = true
 shader_override = ExtResource("1_7ww8b")
