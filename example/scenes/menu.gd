@@ -12,7 +12,6 @@ func _on_connection_established(_id: int):
 	# needed to satisfy
 	Game.load_map()
 
-
 func _on_connect_pressed():
 	var peer = WebSocketMultiplayerPeer.new()
 	print(peer.create_client("ws://127.0.0.1:%d" % Game.PORT))
