@@ -53,4 +53,4 @@ func _input(event):
 	# Handle body rotation.
 	if event is InputEventMouseMotion:
 		rotation.y += event.relative.x * -0.005
-		rotation.x += event.relative.y * -0.005
+		rotation.x = clamp(rotation.x + event.relative.y * -0.005, -0.9, 1)
