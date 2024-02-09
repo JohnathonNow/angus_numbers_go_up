@@ -11,7 +11,9 @@ func _ready():
 
 func _on_connection_established(_id: int):
 	# needed to satisfy
+	Game.player_name = $"VBoxContainer/Name".text
 	Game.load_map()
+
 
 func _on_connect_pressed():
 	var peer = WebSocketMultiplayerPeer.new()

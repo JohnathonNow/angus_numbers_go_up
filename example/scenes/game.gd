@@ -10,6 +10,7 @@ const PORT : int = 13370
 
 var menu : Control = null
 var map : Node = null
+var player_name : String = ""
 
 
 func _ready():
@@ -31,17 +32,23 @@ func load_map():
 	map = preload("res://scenes/map.tscn").instantiate()
 	main.add_child(map)
 	
-	if not multiplayer.is_server():
-		spawn_player(multiplayer.get_unique_id())
+	if not multiplayer.is_server(): #do not spawn a player for the server
+		spawn_player(multiplayer.get_unique_id()).peer_name = player_name
 
 func spawn_player(id: int):
-	if id == 1: 
+	if id == 1: #do not spawn a player for the server
 		return
 	var player = preload("res://scenes/player.tscn").instantiate()
 	player.peer_id = id
 	players.add_child(player, true)
+	return player
 
 func remove_player(id: int):
 	if not players.has_node(str(id)):
 		return
 	players.get_node(str(id)).queue_free()
+	
+func get_player_name(id: int) -> String:
+	if not players.has_node(str(id)):
+		return ""
+	return players.get_node(str(id)).peer_name

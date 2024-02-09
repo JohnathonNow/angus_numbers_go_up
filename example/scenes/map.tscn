@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://d0kbbii8qj6we"]
+[gd_scene load_steps=9 format=3 uid="uid://d0kbbii8qj6we"]
 
 [ext_resource type="Terrain3DStorage" uid="uid://u3bjwp3rwhqa" path="res://new_terrain_3d_storage.res" id="2_j7qs3"]
 [ext_resource type="Terrain3DMaterial" uid="uid://cdlanu26qgib0" path="res://new_terrain_3d_material.tres" id="3_u7uaj"]
 [ext_resource type="Terrain3DTextureList" uid="uid://cdqhox24jv8ef" path="res://new_terrain_3d_texture_list.tres" id="4_2uch3"]
+[ext_resource type="Script" path="res://scenes/chat.gd" id="4_kxntp"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_apb68"]
 sky_top_color = Color(0.211765, 0.427451, 0.823529, 1)
@@ -17,6 +18,9 @@ background_mode = 2
 sky = SubResource("Sky_xsbnd")
 tonemap_mode = 2
 glow_enabled = true
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_feip6"]
+bg_color = Color(0, 0, 0, 0.305882)
 
 [node name="Map" type="Node"]
 
@@ -36,3 +40,36 @@ fov = 70.0
 storage = ExtResource("2_j7qs3")
 material = ExtResource("3_u7uaj")
 texture_list = ExtResource("4_2uch3")
+
+[node name="Chat" type="Panel" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -771.0
+offset_top = -489.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 0
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_feip6")
+script = ExtResource("4_kxntp")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Chat"]
+layout_mode = 0
+offset_right = 167.0
+offset_bottom = 104.0
+
+[node name="TextEdit" type="TextEdit" parent="Chat"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.709
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 80.299
+offset_right = -1.0
+offset_bottom = -5.0
+
+[connection signal="gui_input" from="Chat/TextEdit" to="Chat" method="_on_text_edit_gui_input"]

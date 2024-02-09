@@ -4,12 +4,17 @@ const GRAVITY = 30.0
 const SPEED = 15.0
 const JUMP_VELOCITY = 10.0
 
+@export var peer_name : String : 
+	set(value):
+		peer_name = value
+		$Label3D.text = value
+
 # Peer id.
 @export var peer_id : int : 
 	set(value):
 		peer_id = value
 		name = str(peer_id)
-		$Label3D.text = str(peer_id)
+
 		set_multiplayer_authority(peer_id)
 
 func _ready():
@@ -20,6 +25,7 @@ func _ready():
 	set_process_input(is_local)
 	set_physics_process(is_local)
 	set_process(is_local)
+	$Synchronizer.replication_config.add_property(":peer_name")
 
 func _process(_delta):
 	# Handle mouse capture.
