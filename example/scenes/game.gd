@@ -31,12 +31,12 @@ func load_map():
 	map = preload("res://scenes/map.tscn").instantiate()
 	main.add_child(map)
 	
-	# if multiplayer.is_server():
-	print("0. calling this as %d" % multiplayer.get_unique_id())
-	spawn_player(multiplayer.get_unique_id())
+	if not multiplayer.is_server():
+		spawn_player(multiplayer.get_unique_id())
 
 func spawn_player(id: int):
-	print("1. I am %d and I see %d" % [multiplayer.get_unique_id(), id])
+	if id == 1: 
+		return
 	var player = preload("res://scenes/player.tscn").instantiate()
 	player.peer_id = id
 	players.add_child(player, true)
