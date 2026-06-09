@@ -12,17 +12,6 @@ uv1_scale = Vector3(2, 2, 2)
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_m63jp"]
 material = SubResource("StandardMaterial3D_ehqw6")
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_i4osf"]
-properties/0/path = NodePath(".:peer_id")
-properties/0/spawn = true
-properties/0/replication_mode = 0
-properties/1/path = NodePath(".:position")
-properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath(".:rotation")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
 script = ExtResource("1_5gimg")
@@ -45,5 +34,3 @@ text = "1"
 font_size = 64
 outline_size = 8
 
-[node name="Synchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_i4osf")

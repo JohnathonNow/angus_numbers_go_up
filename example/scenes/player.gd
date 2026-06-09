@@ -1,62 +1,62 @@
 extends CharacterBody3D
 
-const GRAVITY = 30.0
 const SPEED = 15.0
-const JUMP_VELOCITY = 10.0
 
 @export var peer_name : String : 
 	set(value):
 		peer_name = value
-		$Label3D.text = value
+		update_ui()
 
-# Peer id.
-@export var peer_id : int : 
-	set(value):
-		peer_id = value
-		name = str(peer_id)
+var hp: int = 100
+var max_hp: int = 100
+var xp: int = 0
+var level: int = 1
 
-		set_multiplayer_authority(peer_id)
+var target_x: int = 0
+var target_y: int = 0
+
+func update_ui():
+	$Label3D.text = "%s\nLvl: %d XP: %d\nHP: %d/%d" % [peer_name, level, xp, hp, max_hp]
 
 func _ready():
-	# Set local camera.
-	$Camera3D.current = peer_id == multiplayer.get_unique_id()
-	# Set process functions for current player.
-	var is_local = is_multiplayer_authority()
-	set_process_input(is_local)
-	set_physics_process(is_local)
-	set_process(is_local)
-	$Synchronizer.replication_config.add_property(":peer_name")
+	# Only enable camera for the current player
+	$Camera3D.current = (peer_name == Game.player_name)
+	update_ui()
 
-func _process(_delta):
-	# Handle mouse capture.
-	if Input.is_action_just_released("ui_cancel"):
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE else Input.MOUSE_MODE_VISIBLE
-
-func _physics_process(delta):
-	# Add the gravity.
-	if not is_on_floor():
-		velocity.y -= GRAVITY * delta
-
-	# Handle Jump.
-	if Input.is_action_just_pressed("move_jump") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
-
-	# Get the input direction and handle the movement/deceleration.
-	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
-	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
-		velocity.z = move_toward(velocity.z, 0, SPEED)
-
-	move_and_slide()
+func _process(delta):
+	# Interpolate position towards the target coordinates received from backend
+	# In the backend, 'x' and 'y' are grid coordinates. We'll map them directly to X and Z in 3D.
+	var target_pos = Vector3(float(target_x), position.y, float(target_y))
+	position = position.lerp(target_pos, delta * 10.0)
 
 func _input(event):
-	if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+	if peer_name != Game.player_name:
 		return
-	# Handle body rotation.
-	if event is InputEventMouseMotion:
-		rotation.y += event.relative.x * -0.005
-		rotation.x = clamp(rotation.x + event.relative.y * -0.005, -0.9, 1)
+
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		# Ensure we don't move when clicking on UI
+		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+			var camera = get_viewport().get_camera_3d()
+			if not camera:
+				return
+
+			var from = camera.project_ray_origin(event.position)
+			var to = from + camera.project_ray_normal(event.position) * 1000.0
+
+			var space_state = get_world_3d().direct_space_state
+			var query = PhysicsRayQueryParameters3D.create(from, to)
+			var result = space_state.intersect_ray(query)
+
+			if result:
+				var hit_pos = result.position
+				var grid_x = int(round(hit_pos.x))
+				var grid_y = int(round(hit_pos.z))
+				Game.send_packet({"Walk": {"x": grid_x, "y": grid_y}})
+			else:
+				# Fallback: intersect with Y=0 plane
+				var plane = Plane(Vector3.UP, 0)
+				var intersection = plane.intersects_ray(from, camera.project_ray_normal(event.position))
+				if intersection:
+					var grid_x = int(round(intersection.x))
+					var grid_y = int(round(intersection.z))
+					Game.send_packet({"Walk": {"x": grid_x, "y": grid_y}})
