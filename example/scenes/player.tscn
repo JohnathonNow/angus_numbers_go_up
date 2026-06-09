@@ -23,7 +23,9 @@ shape = SubResource("CapsuleShape3D_r7tdq")
 transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 0, 0, 0)
 mesh = SubResource("CapsuleMesh_m63jp")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="CameraPivot" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
 transform = Transform3D(0.999761, -0.0186337, -0.0114438, 0.0208862, 0.968696, 0.24737, 0.00647616, -0.24755, 0.968854, 0, 1.17744, 4.7241)
 fov = 88.2881
 
