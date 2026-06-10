@@ -20,8 +20,15 @@ func update_ui():
 
 func _ready():
 	# Only enable camera for the current player
-	$Camera3D.current = (peer_name == Game.player_name)
+	$CameraPivot/Camera3D.current = (peer_name == Game.player_name)
 	update_ui()
+
+func _unhandled_input(event):
+	if peer_name != Game.player_name:
+		return
+
+	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+		$CameraPivot.rotate_y(-event.relative.x * 0.005)
 
 func _process(delta):
 	# Interpolate position towards the target coordinates received from backend
@@ -47,7 +54,7 @@ func _input(event):
 			var query = PhysicsRayQueryParameters3D.create(from, to)
 			var result = space_state.intersect_ray(query)
 
-			if result:
+			if not result.is_empty():
 				var hit_pos = result.position
 				var grid_x = int(round(hit_pos.x))
 				var grid_y = int(round(hit_pos.z))
@@ -56,7 +63,7 @@ func _input(event):
 				# Fallback: intersect with Y=0 plane
 				var plane = Plane(Vector3.UP, 0)
 				var intersection = plane.intersects_ray(from, camera.project_ray_normal(event.position))
-				if intersection:
+				if intersection != null:
 					var grid_x = int(round(intersection.x))
 					var grid_y = int(round(intersection.z))
 					Game.send_packet({"Walk": {"x": grid_x, "y": grid_y}})
